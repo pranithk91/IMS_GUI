@@ -5,7 +5,10 @@ from mysql.connector import Error
 from datetime import datetime
 import pandas as pd
 
-def connect_to_db():
+months = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+def connectToDB():
     try:
         # Replace the credentials with your MySQL username and password
         connection = mysql.connector.connect(
@@ -22,8 +25,8 @@ def connect_to_db():
         return None
 
 
-def fetch_medicine_names():
-    connection = connect_to_db()
+def fetchMedicineNames():
+    connection = connectToDB()
     if connection:
         cursor = connection.cursor()
         cursor.execute("SELECT *  FROM MedicineList")
@@ -39,10 +42,10 @@ def fetch_medicine_names():
         return medicineData, names
     return []
 
-fetch_medicine_names()
+#fetch_medicine_names()
 
-def fetch_magency_names():
-    connection = connect_to_db()
+def fetchMagencyNames():
+    connection = connectToDB()
     if connection:
         cursor = connection.cursor()
         cursor.execute("SELECT AId, MAgency FROM MAgencies")
@@ -51,15 +54,15 @@ def fetch_magency_names():
         names = [row[0] for row in cursor.fetchall()]
         cursor.close()
         connection.close()
-        return names#, mAgencyData
+        return names, mAgencyData
     return []
 
 
 
 
 # Fetch data from invoices table for Invoice dropdown
-def fetch_invoice_numbers():
-    connection = connect_to_db()
+def fetchInvoiceNumbers():
+    connection = connectToDB()
     if connection:
         cursor = connection.cursor()
         cursor.execute("SELECT BillNo FROM DeliveryBills")
@@ -70,18 +73,23 @@ def fetch_invoice_numbers():
     return []
 
 # Function to insert data into the MySQL table
-def insert_data(deliverydate, name, quantity, price, batch_number, expiry_date, invoice_number):
-    connection = connect_to_db()
+def insertBillItemsData(deliverydate, name, quantity, price, batch_number, expiry_date, invoice_number):
+    connection = connectToDB()
     if connection:
         cursor = connection.cursor()
         try:
             cursor.execute("Select MId from MedicineList where MName = '{}'".format(name))
             MId = cursor.fetchall()[0][0]
+            if len(expiry_date) == 4:
+                expDate = months[int(expiry_date[0])] + " 20" + expiry_date[2:] 
+            elif len(expiry_date) == 5:
+                expDate = months[int(expiry_date[:2])] + " 20" + expiry_date[3:]
+            
             cursor.execute("""
-                INSERT INTO StockDeliveries (DeliveryDate, MId, DeliveryStock, price, batch_number,expiry_date, invoice_number)
+                INSERT INTO StockDeliveries (DeliveryDate, MId, DeliveryStock, NewMRP, BatchNumber,ExpiryDate, BillNo)
                            	
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (deliverydate, MId, quantity, price,batch_number,  expiry_date,  invoice_number))
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (deliverydate, MId, quantity, price,batch_number,  expDate,  invoice_number))
             connection.commit()
             print("Data inserted successfully!")
         except mysql.connector.Error as err:
@@ -89,3 +97,7 @@ def insert_data(deliverydate, name, quantity, price, batch_number, expiry_date, 
         finally:
             cursor.close()
             connection.close()
+
+
+def insertDeliveryBillData(deliverydate, name, quantity, price, batch_number, expiry_date, invoice_number):
+    pass
