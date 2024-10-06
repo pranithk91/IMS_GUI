@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
-from database import fetchInvoiceNumbers, fetchMedicineNames, insertBillItemsData, fetchMagencyNames
+from database import fetchInvoiceNumbers, fetchMedicineNames, insertBillItemsData, fetchMagencyNames, insertDeliveryBillData
 
 class CustomTextEdit(QtWidgets.QTextEdit):
     focus_out_signal = QtCore.pyqtSignal()  # Custom signal for focus out
@@ -184,10 +184,29 @@ class Ui_mainWindow(object):
         self.billAmountInput.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.IBeamCursor))
         self.billAmountInput.setObjectName("billAmountInput")
 
+        self.discountInbillLabel = QtWidgets.QLabel(self.deliveryBillsFrame)
+        self.discountInbillLabel.setGeometry(QtCore.QRect(770, 190, 101, 41))        
+        self.discountInbillLabel.setFont(robotoFontBold)
+        self.discountInbillLabel.setStyleSheet("color: #17784E; background-color: #FBFBFA; font-weight: bold;")
+        self.discountInbillLabel.setObjectName("discountInFileLabel")
+
         self.discountCheckBox = QtWidgets.QCheckBox(self.deliveryBillsFrame)
-        self.discountCheckBox.setGeometry(QtCore.QRect(650, 250, 21, 17))
+        self.discountCheckBox.setGeometry(QtCore.QRect(800, 230, 31, 41))
         self.discountCheckBox.setText("")
-        self.discountCheckBox.setObjectName("checkBox")
+        self.discountCheckBox.setObjectName("discountCheckBox")
+        self.discountCheckBox.setStyleSheet("""QCheckBox::indicator {
+                                                width: 25px;
+                                                height: 25px;
+                                                background-color: #FBFBFA;
+                                                
+                                                border-style: solid;
+                                                border-width: 2px;
+                                                border-color: black black black black;
+                                            }
+                                            QCheckBox::indicator:checked {
+                                                background-color: #17784E;
+                                            }
+                                            """)
 
         self.discountLabel = QtWidgets.QLabel(self.deliveryBillsFrame)
         self.discountLabel.setGeometry(QtCore.QRect(680, 190, 81, 41))        
@@ -202,22 +221,31 @@ class Ui_mainWindow(object):
         self.discountInput.setObjectName("discountInput")
 
         self.billInFileLabel = QtWidgets.QLabel(self.deliveryBillsFrame)
-        self.billInFileLabel.setGeometry(QtCore.QRect(810, 190, 181, 41))        
+        self.billInFileLabel.setGeometry(QtCore.QRect(890, 190, 101, 41))        
         self.billInFileLabel.setFont(robotoFontBold)
         self.billInFileLabel.setStyleSheet("color: #17784E; background-color: #FBFBFA; font-weight: bold;")
         self.billInFileLabel.setObjectName("billInFileLabel")
         
 
-        self.billInFileCombobox = QtWidgets.QComboBox(self.deliveryBillsFrame)
-        self.medAgencyCombobox.setEditable(True)
-        self.billInFileCombobox.setEnabled(True)
-        self.billInFileCombobox.setGeometry(QtCore.QRect(810, 230, 181, 51))
-        self.billInFileCombobox.setFont(robotoFont)
-        self.billInFileCombobox.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.billInFileCombobox.setEditable(False)
-        self.billInFileCombobox.setStyleSheet("QComboBox {font-size: 16px; background-color: #FBFBFA;} QComboBox QAbstractItemView {font-size: 14px;}")
-        self.billInFileCombobox.setObjectName("billInFileCombobox")
-        self.billInFileCombobox.addItems(['Yes', 'No'])
+        self.billInFileCheckBox = QtWidgets.QCheckBox(self.deliveryBillsFrame)
+        self.billInFileCheckBox.setGeometry(QtCore.QRect(920, 230, 31, 41))
+        #self.billInFileCheckBox.setFont(robotoFont)
+        self.billInFileCheckBox.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.billInFileCheckBox.setObjectName("billInFileCheckbox")
+        self.billInFileCheckBox.setStyleSheet("""QCheckBox::indicator {
+                                                width: 25px;
+                                                height: 25px;
+                                                background-color: #FBFBFA;
+                                                
+                                                border-style: solid;
+                                                border-width: 2px;
+                                                border-color: black black black black;
+                                            }
+                                            QCheckBox::indicator:checked {
+                                                background-color: #17784E;
+                                            }
+                                            """)
+        
 
         #Bill Items Addition 
 
@@ -444,14 +472,17 @@ class Ui_mainWindow(object):
             invoiceDate = qdateInvoiceDate.toString("yyyy-MM-dd")
             mAgencyName = self.medAgencyCombobox.currentText()
             billAmount = self.billAmountInput.toPlainText()
-            discount = self.discountInput.toPlainText()
-            billInFile = self.billInFileCombobox.currentText()
-
-
+            discountinBill = self.discountCheckBox.isChecked()
+            discountPercent = self.discountInput.toPlainText()
+            billInFile = self.billInFileCheckBox.isChecked()
+            
+            print(invoiceDate, invoiceNumber, mAgencyName, billAmount, discountinBill, discountPercent, billInFile)
+            #invDate, invNumber, mAgency, billAmount, discountInBill, discountPercent, billInFile
+            insertDeliveryBillData(invoiceDate, invoiceNumber, mAgencyName, billAmount, discountinBill, discountPercent, billInFile)
 
             for row in self.billItemList:
-                print(deliveryDate, row[0], row[2], row[1], row[3], row[4], invoiceNumber)
-                insertBillItemsData(deliveryDate, row[0], row[2], row[1], row[3], row[4], invoiceNumber)
+                print(deliveryDate, row[0], row[2], row[1], row[6], row[3], row[4], invoiceNumber)
+                insertBillItemsData(deliveryDate, row[0], row[2], row[1], row[6], row[3], row[4], invoiceNumber)
             self.billItemList = []
             rowCount = self.billItemsTable.rowCount()
             for r in range(rowCount):
@@ -559,7 +590,9 @@ class Ui_mainWindow(object):
         self.deliveryBillsFrame.setTabOrder(self.invNumEdit, self.medAgencyCombobox)
         self.deliveryBillsFrame.setTabOrder(self.medAgencyCombobox, self.billAmountInput)
         self.deliveryBillsFrame.setTabOrder(self.billAmountInput, self.discountInput)
-        self.deliveryBillsFrame.setTabOrder(self.discountInput, self.deliveryDateSelect)
+        self.deliveryBillsFrame.setTabOrder(self.discountInput, self.discountCheckBox)
+        self.deliveryBillsFrame.setTabOrder(self.discountCheckBox, self.billInFileCheckBox)
+        self.deliveryBillsFrame.setTabOrder(self.billInFileCheckBox, self.deliveryDateSelect)
         self.deliveryBillsFrame.setTabOrder(self.deliveryDateSelect, self.medNameCombobox)
         self.deliveryBillsFrame.setTabOrder(self.medNameCombobox, self.mrpInput)
         self.deliveryBillsFrame.setTabOrder(self.mrpInput, self.qtyInput)
@@ -576,7 +609,7 @@ class Ui_mainWindow(object):
         self.addItemButton.setText(_translate("mainWindow", "Add Item"))
         self.label.setStyleSheet(_translate("mainWindow", "color: #17784E; background-color: #FBFBFA; font-weight: bold;"))
         self.label.setText(_translate("mainWindow", "Delivery Bill Details"))
-        self.billInFileCombobox.setPlaceholderText(_translate("mainWindow", "Choose from the list"))
+        #self.billInFileCombobox.setPlaceholderText(_translate("mainWindow", "Choose from the list"))
         self.billItemsTable.setStyleSheet(_translate("mainWindow", "color: #17784E; background-color: #FBFBFA; font-weight: bold;"))
         self.medNameLabel.setText(_translate("mainWindow", "Medicine Name"))
         self.billSubmitButton.setText(_translate("mainWindow", "Submit"))
@@ -587,6 +620,7 @@ class Ui_mainWindow(object):
         self.medAgencyCombobox.setPlaceholderText(_translate("mainWindow", "Choose from the list"))
         self.invDateLabel.setText(_translate("mainWindow", "Invoice Date"))
         self.billInFileLabel.setText(_translate("mainWindow", "Bill In File"))
+        self.discountInbillLabel.setText(_translate("mainWindow", "Disc In Bill"))
         self.invNoLabel.setText(_translate("mainWindow", "Invoice Number"))
         self.expDateLabel.setText(_translate("mainWindow", "Expiry Date"))
         self.billAmountLabel.setText(_translate("mainWindow", "Bill Amount"))
