@@ -73,7 +73,7 @@ def fetchInvoiceNumbers():
     return []
 
 # Function to insert data into the MySQL table
-def insertBillItemsData(deliverydate, name, quantity, price, priceChange, batch_number, expiry_date, invoice_number):
+def insertBillItemsData(deliverydate, name, quantity, price, priceChange, batch_number, expiry_date, invoice_number, saleableStock):
     connection = connectToDB()
     if connection:
         cursor = connection.cursor()
@@ -84,14 +84,22 @@ def insertBillItemsData(deliverydate, name, quantity, price, priceChange, batch_
                 expDate = months[int(expiry_date[0])] + " 20" + expiry_date[2:] 
             elif len(expiry_date) == 5:
                 expDate = months[int(expiry_date[:2])] + " 20" + expiry_date[3:]
-            
-            cursor.execute("""
-                INSERT INTO StockDeliveries (DeliveryDate, MId, DeliveryStock, NewMRP, PriceChange,BatchNumber,ExpiryDate, BillNo)
-                           	
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """, (deliverydate, MId, quantity, price, priceChange, batch_number,   expDate,  invoice_number))
-            connection.commit()
-            print("Data inserted successfully!")
+            if saleableStock:
+                cursor.execute("""
+                    INSERT INTO StockDeliveries (DeliveryDate, MId, SaleableStock, NewMRP, PriceChange,BatchNumber,ExpiryDate, BillNo)
+                                
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (deliverydate, MId, quantity, price, priceChange, batch_number,   expDate,  invoice_number))
+                connection.commit()
+                print("Data inserted successfully!")
+            else:
+                cursor.execute("""
+                    INSERT INTO StockDeliveries (DeliveryDate, MId, DeliveryStock, NewMRP, PriceChange,BatchNumber,ExpiryDate, BillNo)
+                                
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (deliverydate, MId, quantity, price, priceChange, batch_number,   expDate,  invoice_number))
+                connection.commit()
+                print("Data inserted successfully!")
         except mysql.connector.Error as err:
             print(f"Failed to insert data: {err}")
         finally:
@@ -99,21 +107,24 @@ def insertBillItemsData(deliverydate, name, quantity, price, priceChange, batch_
             connection.close()
 
 
-def insertDeliveryBillData(invDate, invNumber, mAgency, billAmount, discountInBill, discountPercent, billInFile):
+def insertDeliveryBillData(invDate, invNumber, mAgency, billAmount, discountInBill, discountPercent, billInFile, saleableStock=False):
     connection = connectToDB()
     if connection:
         cursor = connection.cursor()
         try:
-            cursor.execute("Select AId from MAgencies where MAgency = '{}'".format(mAgency))
-            AId = cursor.fetchall()[0][0]
-
-            cursor.execute("""
-                    INSERT INTO DeliveryBills (BillDate, BillNo, MAgency, BillAmount, DiscountInBill, DiscountPercent, BillInFile)
-                                
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, (invDate, invNumber, mAgency, billAmount, discountInBill, discountPercent, billInFile))
-            connection.commit()
-            print("Data inserted successfully!")
+            
+            if saleableStock:
+                print("This is saleable stock")
+            else:
+                cursor.execute("Select AId from MAgencies where MAgency = '{}'".format(mAgency))
+                AId = cursor.fetchall()[0][0]
+                cursor.execute("""
+                        INSERT INTO DeliveryBills (BillDate, BillNo, MAgency, BillAmount, DiscountInBill, DiscountPercent, BillInFile)
+                                    
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, (invDate, invNumber, mAgency, billAmount, discountInBill, discountPercent, billInFile))
+                connection.commit()
+                print("Data inserted successfully!")
         except mysql.connector.Error as err:
             print(f"Failed to insert data: {err}")
         finally:

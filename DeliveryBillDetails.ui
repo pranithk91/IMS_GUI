@@ -125,34 +125,6 @@
       <string>Delivery Bill Details</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="billInFileCombobox">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>810</x>
-       <y>230</y>
-       <width>181</width>
-       <height>51</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <pointsize>14</pointsize>
-      </font>
-     </property>
-     <property name="cursor">
-      <cursorShape>PointingHandCursor</cursorShape>
-     </property>
-     <property name="editable">
-      <bool>false</bool>
-     </property>
-     <property name="placeholderText">
-      <string>Choose from the list</string>
-     </property>
-    </widget>
     <widget class="QTableWidget" name="billItemstableWidget">
      <property name="geometry">
       <rect>
@@ -395,9 +367,9 @@
     <widget class="QLabel" name="billInFileLabel">
      <property name="geometry">
       <rect>
-       <x>810</x>
+       <x>890</x>
        <y>190</y>
-       <width>181</width>
+       <width>101</width>
        <height>41</height>
       </rect>
      </property>
@@ -443,7 +415,7 @@
     <widget class="QTextEdit" name="discountInput">
      <property name="geometry">
       <rect>
-       <x>680</x>
+       <x>660</x>
        <y>230</y>
        <width>81</width>
        <height>51</height>
@@ -523,7 +495,7 @@
     <widget class="QLabel" name="discountLabel">
      <property name="geometry">
       <rect>
-       <x>680</x>
+       <x>660</x>
        <y>190</y>
        <width>81</width>
        <height>41</height>
@@ -924,14 +896,95 @@
     <widget class="QCheckBox" name="checkBox">
      <property name="geometry">
       <rect>
-       <x>650</x>
-       <y>250</y>
-       <width>21</width>
-       <height>17</height>
+       <x>800</x>
+       <y>230</y>
+       <width>31</width>
+       <height>41</height>
       </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QCheckBox::indicator {
+                                                width: 25px;
+                                                height: 25px;
+                                                background-color: #FBFBFA;
+                                                
+                                                border-style: solid;
+                                                border-width: 2px;
+                                                border-color: black black black black;
+                                            }
+                                            QCheckBox::indicator:checked {
+                                                background-color: #17784E;
+                                            }
+                                           
+                                            </string>
+     </property>
+     <property name="text">
+      <string>Disc In Bill</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_2">
+     <property name="geometry">
+      <rect>
+       <x>920</x>
+       <y>230</y>
+       <width>31</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QCheckBox::indicator {
+                                                width: 25px;
+                                                height: 25px;
+                                                background-color: #FBFBFA;
+                                                
+                                                border-style: solid;
+                                                border-width: 2px;
+                                                border-color: black black black black;
+                                            }
+                                            QCheckBox::indicator:checked {
+                                                background-color: #17784E;
+                                            }
+                                           
+                                            </string>
      </property>
      <property name="text">
       <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="discountLabel_2">
+     <property name="geometry">
+      <rect>
+       <x>770</x>
+       <y>190</y>
+       <width>101</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>14</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: #17784E; background-color: #FBFBFA; font-weight: bold;</string>
+     </property>
+     <property name="text">
+      <string>Disc In Bill</string>
      </property>
     </widget>
    </widget>

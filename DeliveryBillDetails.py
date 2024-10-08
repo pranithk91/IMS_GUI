@@ -425,6 +425,30 @@ class Ui_mainWindow(object):
         self.hsnLabel.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.hsnLabel.setObjectName("hsnLabel")
 
+        self.saleableStockLabel = QtWidgets.QLabel(self.deliveryBillsFrame)
+        self.saleableStockLabel.setGeometry(QtCore.QRect(210, 520, 151, 41))        
+        self.saleableStockLabel.setFont(robotoFontBold)
+        self.saleableStockLabel.setStyleSheet("color: #17784E; background-color: #FBFBFA; font-weight: bold;")
+        self.saleableStockLabel.setObjectName("discountInFileLabel")
+
+        self.saleableStockCheckBox = QtWidgets.QCheckBox(self.deliveryBillsFrame)
+        self.saleableStockCheckBox.setGeometry(QtCore.QRect(370, 523, 31, 41))
+        self.saleableStockCheckBox.setText("")
+        self.saleableStockCheckBox.setObjectName("discountCheckBox")
+        self.saleableStockCheckBox.setStyleSheet("""QCheckBox::indicator {
+                                                width: 20px;
+                                                height: 20px;
+                                                background-color: #FBFBFA;
+                                                
+                                                border-style: solid;
+                                                border-width: 2px;
+                                                border-color: black black black black;
+                                            }
+                                            QCheckBox::indicator:checked {
+                                                background-color: #17784E;
+                                            }
+                                            """)
+
         self.billItemList = []
 
         def onAddItemsButton():
@@ -464,30 +488,33 @@ class Ui_mainWindow(object):
                 show_error_message(self.deliveryBillsFrame,message=str(e))
 
         def onSubmitBillButton():
-            
-            qdateDeliveryDate = self.deliveryDateSelect.date()
-            deliveryDate = qdateDeliveryDate.toString("yyyy-MM-dd")
-            invoiceNumber = self.invNumEdit.toPlainText()
-            qdateInvoiceDate = self.invDateSelect.date()
-            invoiceDate = qdateInvoiceDate.toString("yyyy-MM-dd")
-            mAgencyName = self.medAgencyCombobox.currentText()
-            billAmount = self.billAmountInput.toPlainText()
-            discountinBill = self.discountCheckBox.isChecked()
-            discountPercent = self.discountInput.toPlainText()
-            billInFile = self.billInFileCheckBox.isChecked()
-            
-            print(invoiceDate, invoiceNumber, mAgencyName, billAmount, discountinBill, discountPercent, billInFile)
-            #invDate, invNumber, mAgency, billAmount, discountInBill, discountPercent, billInFile
-            insertDeliveryBillData(invoiceDate, invoiceNumber, mAgencyName, billAmount, discountinBill, discountPercent, billInFile)
+            if len(self.billItemList) > 0: 
+                qdateDeliveryDate = self.deliveryDateSelect.date()
+                deliveryDate = qdateDeliveryDate.toString("yyyy-MM-dd")
+                invoiceNumber = self.invNumEdit.toPlainText()
+                qdateInvoiceDate = self.invDateSelect.date()
+                invoiceDate = qdateInvoiceDate.toString("yyyy-MM-dd")
+                mAgencyName = self.medAgencyCombobox.currentText()
+                billAmount = self.billAmountInput.toPlainText()
+                discountinBill = self.discountCheckBox.isChecked()
+                discountPercent = self.discountInput.toPlainText()
+                billInFile = self.billInFileCheckBox.isChecked()
+                saleableStock = self.saleableStockCheckBox.isChecked()
 
-            for row in self.billItemList:
-                print(deliveryDate, row[0], row[2], row[1], row[6], row[3], row[4], invoiceNumber)
-                insertBillItemsData(deliveryDate, row[0], row[2], row[1], row[6], row[3], row[4], invoiceNumber)
-            self.billItemList = []
-            rowCount = self.billItemsTable.rowCount()
-            for r in range(rowCount):
-                self.billItemsTable.removeRow(r)
-        
+                print(invoiceDate, invoiceNumber, mAgencyName, billAmount, discountinBill, discountPercent, billInFile, saleableStock)
+                #invDate, invNumber, mAgency, billAmount, discountInBill, discountPercent, billInFile
+                insertDeliveryBillData(invoiceDate, invoiceNumber, mAgencyName, billAmount, discountinBill, discountPercent, billInFile,saleableStock)
+
+                for row in self.billItemList:
+                    print(deliveryDate, row[0], row[2], row[1], row[5], row[3], row[4], invoiceNumber)
+                    insertBillItemsData(deliveryDate, row[0], row[2], row[1], row[5], row[3], row[4], invoiceNumber,saleableStock)
+                self.billItemList = []
+                rowCount = self.billItemsTable.rowCount()
+                for r in range(rowCount):
+                    self.billItemsTable.removeRow(r)
+            else: 
+                QMessageBox.warning("Input some data from a bill")
+                return
 
         #Add Items Button
         self.addItemButton = QtWidgets.QPushButton(self.deliveryBillsFrame)
@@ -499,14 +526,35 @@ class Ui_mainWindow(object):
         self.addItemButton.clicked.connect(onAddItemsButton)
         self.addItemButton.setObjectName("addItemButton")
 
+        def selectRow(row):
+            rowData = []
+            for i in range(6):
+                rowData.append(self.billItemsTable.item(row, i).text())
+
+            medName = self.medNameCombobox.findText(rowData[0])     
+            self.medNameCombobox.setCurrentIndex(medName)
+            #medDets = medicineData[(medicineData['MName'] == medName)]
+            self.mrpInput.setText(rowData[1])
+            self.qtyInput.setText(rowData[2])
+            self.batchNumInput.setText(rowData[3])
+            self.ExpDateInput.setText(rowData[4])
+            medDets = medicineData[(medicineData['MName'] == rowData[0])]
+            updateMedDets()
+            self.billItemsTable.removeRow(row)
+
         #Bill Items Table
         self.billItemsTable = QtWidgets.QTableWidget(self.deliveryBillsFrame)
         self.billItemsTable.setGeometry(QtCore.QRect(10, 580, 981, 311))
         self.billItemsTable.setObjectName("billItemsTable")
         self.billItemsTable.setColumnCount(6)
-        #self.tableWidget.setColumnCount(2)  # Set 2 columns
+        self.billItemsTable.setFont(robotoFont)
         self.billItemsTable.setHorizontalHeaderLabels(['Name', 'New Price', 'Qty', 'Batch No', 'Exp Date', 'Price Change' ])
         self.billItemsTable.setRowCount(0)
+        header = self.billItemsTable.horizontalHeader()
+        header.setFont(robotoFont)
+        header.setStyleSheet("color: #17784E; background-color: #FBFBFA; font-weight: bold;")
+        header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        self.billItemsTable.cellDoubleClicked.connect(selectRow)
 
         #Bill Submit Button
         self.billSubmitButton = QtWidgets.QPushButton(self.deliveryBillsFrame)
@@ -598,7 +646,8 @@ class Ui_mainWindow(object):
         self.deliveryBillsFrame.setTabOrder(self.mrpInput, self.qtyInput)
         self.deliveryBillsFrame.setTabOrder(self.qtyInput, self.batchNumInput)
         self.deliveryBillsFrame.setTabOrder(self.batchNumInput, self.ExpDateInput)
-        self.deliveryBillsFrame.setTabOrder(self.ExpDateInput, self.addItemButton)
+        self.deliveryBillsFrame.setTabOrder(self.ExpDateInput, self.saleableStockCheckBox)
+        self.deliveryBillsFrame.setTabOrder(self.saleableStockCheckBox, self.addItemButton)
         self.deliveryBillsFrame.setTabOrder(self.addItemButton, self.billSubmitButton)
         self.deliveryBillsFrame.setTabOrder(self.billSubmitButton, self.billItemsTable)
 
@@ -621,6 +670,7 @@ class Ui_mainWindow(object):
         self.invDateLabel.setText(_translate("mainWindow", "Invoice Date"))
         self.billInFileLabel.setText(_translate("mainWindow", "Bill In File"))
         self.discountInbillLabel.setText(_translate("mainWindow", "Disc In Bill"))
+        self.saleableStockLabel.setText(_translate("mainWindow", "Saleable Stock"))
         self.invNoLabel.setText(_translate("mainWindow", "Invoice Number"))
         self.expDateLabel.setText(_translate("mainWindow", "Expiry Date"))
         self.billAmountLabel.setText(_translate("mainWindow", "Bill Amount"))
