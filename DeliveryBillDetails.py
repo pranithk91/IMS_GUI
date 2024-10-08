@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 from database import fetchInvoiceNumbers, fetchMedicineNames, insertBillItemsData, fetchMagencyNames, insertDeliveryBillData
+from AddNewMedicineForm import FormPopup
 
 class CustomTextEdit(QtWidgets.QTextEdit):
     focus_out_signal = QtCore.pyqtSignal()  # Custom signal for focus out
@@ -153,7 +154,7 @@ class Ui_mainWindow(object):
         self.medAgencyLabel = QtWidgets.QLabel(self.deliveryBillsFrame)
         self.medAgencyLabel.setGeometry(QtCore.QRect(10, 190, 181, 41))   
         self.medAgencyLabel.setFont(robotoFontBold)
-        self.medAgencyLabel.setStyleSheet("QComboBox {font-size: 16px; background-color: #FBFBFA;} QComboBox QAbstractItemView {font-size: 14px;}")
+        self.medAgencyLabel.setStyleSheet("color: #17784E; background-color: #FBFBFA; font-weight: bold;")
         self.medAgencyLabel.setObjectName("medAgencyLabel")
 
         self.medAgencyCombobox = QtWidgets.QComboBox(self.deliveryBillsFrame)
@@ -164,6 +165,7 @@ class Ui_mainWindow(object):
         self.medAgencyCombobox.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.medAgencyCombobox.setPlaceholderText('Select')
         self.medAgencyCombobox.setObjectName("medAgencyCombobox")
+        self.medAgencyCombobox.setStyleSheet("QComboBox {font-size: 16px; background-color: #FBFBFA;} QComboBox QAbstractItemView {font-size: 14px;}")
         self.medAgencyCombobox.addItems(mAgencyNames)
         medAgencyCompleter = QtWidgets.QCompleter(mAgencyNames, self.medAgencyCombobox)
         medAgencyCompleter.setCaseSensitivity(QtCore.Qt.CaseInsensitive)  # Case-insensitive matching
@@ -526,6 +528,21 @@ class Ui_mainWindow(object):
         self.addItemButton.clicked.connect(onAddItemsButton)
         self.addItemButton.setObjectName("addItemButton")
 
+
+        def formPopUp():
+            form = FormPopup()
+            form.exec_()
+
+
+        self.addNewProductButton = QtWidgets.QPushButton(self.deliveryBillsFrame)
+        self.addNewProductButton.setGeometry(QtCore.QRect(840, 510, 151, 51))
+        self.addNewProductButton.setFont(robotoFont)
+        self.addNewProductButton.setAutoFillBackground(False)
+        self.addNewProductButton.setStyleSheet("color: #17784E; background-color: #FBFBFA; ")
+        self.addNewProductButton.setFlat(False)
+        self.addNewProductButton.clicked.connect(formPopUp)
+        self.addNewProductButton.setObjectName("addItemButton")
+
         def selectRow(row):
             rowData = []
             for i in range(6):
@@ -656,6 +673,7 @@ class Ui_mainWindow(object):
         mainWindow.setWindowTitle(_translate("mainWindow", "Dr Preethi\'s Skin Hair and Laser Clinic"))
         self.currQtyLabel.setText(_translate("mainWindow", "Current Qty:"))
         self.addItemButton.setText(_translate("mainWindow", "Add Item"))
+        self.addNewProductButton.setText(_translate ("mainWindow", "Add New Medicine"))
         self.label.setStyleSheet(_translate("mainWindow", "color: #17784E; background-color: #FBFBFA; font-weight: bold;"))
         self.label.setText(_translate("mainWindow", "Delivery Bill Details"))
         #self.billInFileCombobox.setPlaceholderText(_translate("mainWindow", "Choose from the list"))
