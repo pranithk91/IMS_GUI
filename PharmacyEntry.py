@@ -2,7 +2,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 from database import fetchInvoiceNumbers, fetchMedicineNames, insertBillItemsData, fetchMagencyNames, insertDeliveryBillData
 from AddNewMedicineForm import FormPopup
-#from PharmacyEntry import pharmacyUI
 
 class CustomTextEdit(QtWidgets.QTextEdit):
     focus_out_signal = QtCore.pyqtSignal()  # Custom signal for focus out
@@ -14,14 +13,15 @@ class CustomTextEdit(QtWidgets.QTextEdit):
     
 
 
-#class deliveryBillsUi(object):
-class deliveryBillsUi(QtWidgets.QWidget):
-    def __init__(self):
+class PharmacyWindow(QtWidgets.QWidget):
+    """def __init__(self):
         super().__init__()
-        self.initUI()
+        layout = QtWidgets.QGridLayout()
+        label = QtWidgets.QLabel("Pharmacy Section")
+        layout.addWidget(label)
+        self.setLayout(layout)"""
 
-
-    def initUI(self):
+    def setupUi(self, mainWindow):
         mainWindow.setObjectName("mainWindow")
         mainWindow.resize(1841, 1071)
         self.centralwidget = QtWidgets.QWidget(mainWindow)
@@ -31,11 +31,7 @@ class deliveryBillsUi(QtWidgets.QWidget):
         invNums = fetchInvoiceNumbers()
         mAgencyNames,mAgencyData = fetchMagencyNames()
 
-        """def focusOutEvent(self, event):
-            # Emit custom signal when the focus is lost
-            QtCore.pyqtSignal().focus_out_signal.emit()
-            super(QtWidgets.QTextEdit, self).focusOutEvent(event)"""
-
+        
         def showInvoiceWarning():
             invNum = self.invNumEdit.toPlainText()
             if invNum in invNums:
@@ -68,7 +64,7 @@ class deliveryBillsUi(QtWidgets.QWidget):
             
 
         #Delivery Bills Frame
-        self.deliveryBillsFrame = QtWidgets.QFrame(self)
+        self.deliveryBillsFrame = QtWidgets.QFrame(self.centralwidget)
         self.deliveryBillsFrame.setGeometry(QtCore.QRect(420, 0, 1001, 1031))
         self.deliveryBillsFrame.setStyleSheet(" background-color:#F6F8F5;")
         self.deliveryBillsFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -538,10 +534,6 @@ class deliveryBillsUi(QtWidgets.QWidget):
         def formPopUp():
             form = FormPopup()
             form.exec_()
-        
-        def pharmacyUIPage():
-            pharmacyUIPage = pharmacyUI()
-            pharmacyUIPage.exec_()
 
 
         self.addNewProductButton = QtWidgets.QPushButton(self.deliveryBillsFrame)
@@ -593,7 +585,7 @@ class deliveryBillsUi(QtWidgets.QWidget):
         self.billSubmitButton.setObjectName("billSubmitButton")
 
         #Left Navigation Frame
-        self.menuFrame = QtWidgets.QFrame(self)
+        self.menuFrame = QtWidgets.QFrame(self.centralwidget)
         self.menuFrame.setGeometry(QtCore.QRect(0, 0, 341, 1031))
         self.menuFrame.setStyleSheet(" background-color: #F6F8F5; font-weight: bold;")
         self.menuFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -604,7 +596,6 @@ class deliveryBillsUi(QtWidgets.QWidget):
         self.pharmacyMenuButton.setGeometry(QtCore.QRect(0, 300, 341, 61))        
         self.pharmacyMenuButton.setFont(robotoFontBold)
         self.pharmacyMenuButton.setStyleSheet("color: #17784E; background-color: #FBFBFA; font-weight: bold;")
-        self.pharmacyMenuButton.clicked.connect(pharmacyUIPage)
         self.pharmacyMenuButton.setObjectName("pharmacyMenuButton")
 
         self.proceduresMenuButton = QtWidgets.QPushButton(self.menuFrame)
@@ -644,7 +635,7 @@ class deliveryBillsUi(QtWidgets.QWidget):
         self.consumablesMenuButton.setObjectName("consumablesMenuButton")
 
         #Design Frame
-        self.designFrame = QtWidgets.QFrame(self)
+        self.designFrame = QtWidgets.QFrame(self.centralwidget)
         self.designFrame.setGeometry(QtCore.QRect(340, -1, 81, 1031))
         self.designFrame.setStyleSheet("color: #17784E; background-color: #EEDDDD; font-weight: bold;")
         self.designFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -686,7 +677,7 @@ class deliveryBillsUi(QtWidgets.QWidget):
         self.addItemButton.setText(_translate("mainWindow", "Add Item"))
         self.addNewProductButton.setText(_translate ("mainWindow", "Add New Medicine"))
         self.label.setStyleSheet(_translate("mainWindow", "color: #17784E; background-color: #FBFBFA; font-weight: bold;"))
-        self.label.setText(_translate("mainWindow", "Delivery Bill Details"))
+        self.label.setText(_translate("mainWindow", "Pharmacy"))
         #self.billInFileCombobox.setPlaceholderText(_translate("mainWindow", "Choose from the list"))
         self.billItemsTable.setStyleSheet(_translate("mainWindow", "color: #17784E; background-color: #FBFBFA; font-weight: bold;"))
         self.medNameLabel.setText(_translate("mainWindow", "Medicine Name"))
@@ -727,8 +718,7 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     mainWindow = QtWidgets.QMainWindow()
-    window = deliveryBillsUi()
-    window.setWindowTitle('Delivery Bill Details')
-    window.resize(1841, 1071)  # Set window size to 1841x1071
-    window.show()
+    ui = PharmacyWindow()
+    ui.setupUi(mainWindow)
+    mainWindow.show()
     sys.exit(app.exec_())

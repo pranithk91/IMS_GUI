@@ -23,7 +23,7 @@ def connectToDB():
     except Error as e:
         messagebox.showerror("Database Error", f"Error while connecting to MySQL: {str(e)}")
         return None
-
+connectToDB()
 
 def fetchMedicineNames():
     connection = connectToDB()

@@ -1,114 +1,90 @@
-import tkinter as tk
-from tkinter import messagebox
-import mysql.connector
-from mysql.connector import Error
-from datetime import datetime
+import sys
+from PyQt5 import QtWidgets, QtCore
+from test import BillingForm
+from DeliveryBillDetails import deliveryBillsUi
+from PharmacyEntry import PharmacyWindow
 
-# MySQL connection function
-def connect_to_db():
-    try:
-        # Replace the credentials with your MySQL username and password
-        connection = mysql.connector.connect(
-        host="193.203.184.152",
-        port='3306',
-        user="u885517842_AdminUser",
-        password="MdP@ssword!!1",
-        database="u885517842_MedicalStore"
-        )
-        if connection.is_connected():
-            return connection
-    except Error as e:
-        messagebox.showerror("Database Error", f"Error while connecting to MySQL: {str(e)}")
-        return None
+class DeliveryWindow(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        layout = QtWidgets.QVBoxLayout()
+        label = QtWidgets.QLabel("Delivery Section")
+        layout.addWidget(label)
+        self.setLayout(layout)
 
+class OPWindow(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        layout = QtWidgets.QVBoxLayout()
+        label = QtWidgets.QLabel("OP Section")
+        layout.addWidget(label)
+        self.setLayout(layout)
 
-
-
-
-# Insert data function
-
-def insert_data(date, name, quantity, price, expiry_date, batch_number, invoice_number):
-    connection = connect_to_db()
-    if connection:
-        try:
-            cursor = connection.cursor()
-            # Prepare the insert query
-            query = """INSERT INTO your_table_name (date, MId, quantity, price, expiry_date, batch_number, invoice_number) 
-                       VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-            # Execute the query with user inputs
-            cursor.execute(query, (date, name, quantity, price, expiry_date, batch_number, invoice_number))
-            connection.commit()
-            messagebox.showinfo("Success", "Data inserted successfully")
-        except Error as e:
-            messagebox.showerror("Error", f"Failed to insert data: {str(e)}")
-        finally:
-            if connection.is_connected():
-                cursor.close()
-                connection.close()
-
-# Submit button callback
-def submit_data():
-    # Fetch data from entry fields
-    date = entry_date.get()
-    name = entry_name.get()
-    quantity = entry_quantity.get()
-    price = entry_price.get()
-    expiry_date = entry_expiry.get()
-    batch_number = entry_batch.get()
-    invoice_number = entry_invoice.get()
+class MainWindow(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
     
-    # Validate input fields
-    if not all([date, name, quantity, price, expiry_date, batch_number, invoice_number]):
-        messagebox.showwarning("Input Error", "All fields must be filled out")
-        return
 
-    try:
-        # Check date format for 'date' and 'expiry_date'
-        datetime.strptime(date, '%Y-%m-%d')
-        datetime.strptime(expiry_date, '%Y-%m-%d')
-    except ValueError:
-        messagebox.showerror("Date Error", "Invalid date format. Use YYYY-MM-DD")
-        return
 
-    # Insert data into database
-    insert_data(date, name, quantity, price, expiry_date, batch_number, invoice_number)
+    def initUI(self):
+        # Create a horizontal layout
+        hbox = QtWidgets.QHBoxLayout(self)
 
-# Tkinter setup
-root = tk.Tk()
-root.title("Data Collection Form")
+        # Create a vertical layout for the buttons (left-side menu)
+        vbox = QtWidgets.QVBoxLayout()
 
-# Define labels and entry fields
-tk.Label(root, text="Date (YYYY-MM-DD)").grid(row=0, column=0)
-entry_date = tk.Entry(root)
-entry_date.grid(row=0, column=1)
+        # Create the buttons for the menu
+        self.pharmacyButton = QtWidgets.QPushButton("Pharmacy")
+        self.deliveryButton = QtWidgets.QPushButton("Delivery")
+        self.opButton = QtWidgets.QPushButton("OP")
 
-tk.Label(root, text="Name").grid(row=1, column=0)
-entry_name = tk.Entry(root)
-entry_name.grid(row=1, column=1)
+        vbox.addWidget(self.pharmacyButton)
+        vbox.addWidget(self.deliveryButton)
+        vbox.addWidget(self.opButton)
 
-tk.Label(root, text="Quantity").grid(row=2, column=0)
-entry_quantity = tk.Entry(root)
-entry_quantity.grid(row=2, column=1)
+        # Add stretch to push the buttons to the top of the menu
+        vbox.addStretch()
 
-tk.Label(root, text="Price").grid(row=3, column=0)
-entry_price = tk.Entry(root)
-entry_price.grid(row=3, column=1)
+        # Create a stacked widget to hold different pages
+        self.stackedWidget = QtWidgets.QStackedWidget(self)
+        
+        # Create instances of each window
+        self.pharmacyWindow = PharmacyWindow()
+        self.deliveryWindow = DeliveryWindow()
+        self.opWindow = OPWindow()
 
-tk.Label(root, text="Expiry Date (YYYY-MM-DD)").grid(row=4, column=0)
-entry_expiry = tk.Entry(root)
-entry_expiry.grid(row=4, column=1)
+        # Add the windows to the stacked widget
+        self.stackedWidget.addWidget(self.pharmacyWindow)  # Index 0
+        self.stackedWidget.addWidget(self.deliveryWindow)   # Index 1
+        self.stackedWidget.addWidget(self.opWindow)         # Index 2
 
-tk.Label(root, text="Batch Number").grid(row=5, column=0)
-entry_batch = tk.Entry(root)
-entry_batch.grid(row=5, column=1)
+        # Connect the buttons to the respective window pages
+        self.pharmacyButton.clicked.connect(self.showPharmacy)
+        self.deliveryButton.clicked.connect(self.showDelivery)
+        self.opButton.clicked.connect(self.showOP)
 
-tk.Label(root, text="Invoice Number").grid(row=6, column=0)
-entry_invoice = tk.Entry(root)
-entry_invoice.grid(row=6, column=1)
+        # Add the left-side menu and the stacked widget to the horizontal layout
+        hbox.addLayout(vbox)             # Left-side menu (buttons)
+        hbox.addWidget(self.stackedWidget)  # Main content (stacked windows)
 
-# Submit button
-submit_button = tk.Button(root, text="Submit", command=submit_data)
-submit_button.grid(row=7, columnspan=2)
+        # Set the default window to be the Pharmacy window
+        self.stackedWidget.setCurrentIndex(0)
 
-# Start the Tkinter main loop
-root.mainloop()
+    def showPharmacy(self):
+        self.stackedWidget.setCurrentIndex(0)
+
+    def showDelivery(self):
+        self.stackedWidget.setCurrentIndex(1)
+
+    def showOP(self):
+        pass
+        #self.stackedWidget.setCurrentIndex(2)
+
+if __name__ == '__main__':
+    app = QtWidgets.QApplication(sys.argv)
+    mainWin = MainWindow()
+    mainWin.setWindowTitle('Menu Navigation Example')
+    mainWin.resize(800, 600)
+    mainWin.show()
+    sys.exit(app.exec_())
